@@ -22,11 +22,7 @@ class Client:
         result = channel.queue_declare(queue='', exclusive=True)
         self.queue_name = result.method.queue
 
-        channel.basic_consume(
-            queue=self.queue_name, on_message_callback=self.read_message, auto_ack=True
-        )
-
-        consuming = Thread(target=channel.start_consuming, daemon=True)
+        consuming = Thread(target=self.reading, daemon=True)
         consuming.start()
 
     def send_message(self, message):
@@ -46,3 +42,14 @@ class Client:
 
     def read_message(self, ch, method, properties, body):
         self.message_subscriber.receive_message(body, method.exchange)
+
+    def reading(self):
+        while True:
+            connection = pika.BlockingConnection()
+
+            channel = connection.channel()
+            channel.basic_consume(
+                queue=self.queue_name, on_message_callback=self.read_message, auto_ack=True
+            )
+            channel.start_consuming()
+            connection.close()
