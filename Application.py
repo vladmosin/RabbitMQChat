@@ -9,8 +9,6 @@ from client import Client
 
 
 class ChatWindow(MessageSubscriber):
-    def receive_message(self, text, name, channel):
-        pass
 
     def __init__(self, root, username, client: Client):
         self.client = client
@@ -75,6 +73,9 @@ class ChatWindow(MessageSubscriber):
         input_value = self.channel_name_to_input_field[channel_name].get()
         self.channel_name_to_input_user[channel_name].set('')
         print(f'Send into: {channel_name}. Message: {input_value}')
+
+    def receive_message(self, text, channel):
+        pass
 
 
 def start_client():
