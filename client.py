@@ -44,8 +44,9 @@ class Client:
         self.message_subscriber.receive_message(body, method.exchange)
 
     def reading(self):
+        channel = pika.BlockingConnection(pika.ConnectionParameters(host='localhost')).channel()
         while True:
-            self.channel.basic_consume(
+            channel.basic_consume(
                 queue=self.queue_name, on_message_callback=self.read_message, auto_ack=True
             )
-            self.channel.start_consuming()
+            channel.start_consuming()
