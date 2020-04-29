@@ -9,6 +9,9 @@ from client import Client
 
 
 class ChatWindow(MessageSubscriber):
+    def receive_message(self, text, name, channel):
+        pass
+
     def __init__(self, root, username, client: Client):
         self.client = client
         self.frame = Frame(root)
