@@ -34,17 +34,18 @@ class ChatWindow(MessageSubscriber):
 
         self.frame.pack(fill=BOTH, expand=YES)
 
-        self.input_channel_name = StringVar()
-        self.input_channel_name_field = Entry(self.tab_parent, text=self.input_channel_name)
-        self.input_channel_name_field.grid(row=2, column=0, sticky=W+E+S)
-        self.subscribe_button = Button(self.tab_parent, text="Subscribe", command=self.subscribe)
-        self.subscribe_button.grid(row=2, column=1, sticky=S)
+        # self.input_channel_name = StringVar()
+        # self.input_channel_name_field = Entry(self.tab_parent, text=self.input_channel_name)
+        # self.input_channel_name_field.grid(row=2, column=0, sticky=W+E+S)
+        # self.subscribe_button = Button(self.tab_parent, text="Subscribe", command=self.subscribe)
+        # self.subscribe_button.grid(row=2, column=1, sticky=S)
 
     def subscribe(self):
-        channel_name = self.input_channel_name_field.get()
-        self.input_channel_name.set('')
-        print(f'Subscribe on: {channel_name}')
-        self.client.switch_to_chat(channel_name)
+        # channel_name = self.input_channel_name_field.get()
+        # self.input_channel_name.set('')
+        # print(f'Subscribe on: {channel_name}')
+        # self.client.switch_to_chat(channel_name)
+        pass
 
     def configure_tab(self, channel_name):
         tab = ttk.Frame(self.tab_parent)
@@ -90,7 +91,8 @@ class ChatWindow(MessageSubscriber):
         self.client.send_message(message)
 
     def receive_message(self, text, channel):
-        self.put_message_in_channel(channel, text)
+        # self.put_message_in_channel(channel, text)
+        print(f'Receive message in channel = {channel}: {text}')
 
 
 def start_client():

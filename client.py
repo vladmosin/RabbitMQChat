@@ -26,7 +26,7 @@ class Client:
             queue=self.queue_name, on_message_callback=self.read_message, auto_ack=True
         )
 
-        consuming = Thread(channel.start_consuming)
+        consuming = Thread(target=channel.start_consuming, daemon=True)
         consuming.start()
 
     def send_message(self, message):
