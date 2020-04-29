@@ -9,7 +9,7 @@ class Chat:
 
 
 class Client:
-    def __init__(self):
+    def __init__(self, message_subscriber):
         connection = pika.BlockingConnection(
             pika.ConnectionParameters(host='localhost'))
         channel = connection.channel()
@@ -17,6 +17,7 @@ class Client:
         self.active_chat = None
         self.chats = {}
         self.channel = channel
+        self.message_subscriber = message_subscriber
 
         consuming = Thread(channel.start_consuming)
         consuming.start()
@@ -40,4 +41,4 @@ class Client:
         self.channel.queue_bind(exchange=chat_name, queue=queue_name)
 
     def read_message(self, ch, method, properties, body):
-        return
+
