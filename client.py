@@ -19,6 +19,13 @@ class Client:
         self.channel = channel
         self.message_subscriber = message_subscriber
 
+        result = channel.queue_declare(queue='', exclusive=True)
+        self.queue_name = result.method.queue
+
+        channel.basic_consume(
+            queue=self.queue_name, on_message_callback=read_message, auto_ack=True
+        )
+
         consuming = Thread(channel.start_consuming)
         consuming.start()
 
@@ -35,10 +42,8 @@ class Client:
             self.chats[chat_name] = Chat(chat_name)
 
         self.active_chat = self.chats[chat_name]
+        self.channel.queue_bind(exchange=chat_name, queue=self.queue_name)
 
-        result = self.channel.queue_declare(queue='', exclusive=True)
-        queue_name = result.method.queue
-        self.channel.queue_bind(exchange=chat_name, queue=queue_name)
 
-    def read_message(self, ch, method, properties, body):
-
+def read_message(self, ch, method, properties, body):
+    self.message_subscriber(body, method.exchange)
