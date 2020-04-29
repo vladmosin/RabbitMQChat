@@ -9,7 +9,8 @@ from client import Client
 
 
 class ChatWindow(MessageSubscriber):
-    def __init__(self, root, username):
+    def __init__(self, root, username, client: Client):
+        self.client = client
         self.frame = Frame(root)
         self.username = username
         self.put_message_lock = Lock()
@@ -30,6 +31,8 @@ class ChatWindow(MessageSubscriber):
         self.configure_tab('2 channel')
 
         self.frame.pack(fill=BOTH, expand=YES)
+
+        self.put_message_in_channel('1 channel', 'Hello world!', 'Vasya')
 
     def configure_tab(self, channel_name):
         tab = ttk.Frame(self.tab_parent)
@@ -71,7 +74,7 @@ class ChatWindow(MessageSubscriber):
         print(f'Send into: {channel_name}. Message: {input_value}')
 
 
-def client():
+def start_client():
     root = Tk()
     root.title("MQ Rabbit Chat")
     root.withdraw()
@@ -79,10 +82,10 @@ def client():
     if username is None:
         return
     root.deiconify()
-    # client = Client(username)
-    chat_window = ChatWindow(root, username)
+    client = Client(username)
+    chat_window = ChatWindow(root, username, client)
     root.mainloop()
 
 
 if __name__ == "__main__":
-    client()
+    start_client()
