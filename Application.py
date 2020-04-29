@@ -10,8 +10,8 @@ from client import Client
 
 class ChatWindow(MessageSubscriber):
 
-    def __init__(self, root, username, client: Client):
-        self.client = client
+    def __init__(self, root, username):
+        self.client = None
         self.frame = Frame(root)
         self.username = username
         self.put_message_lock = Lock()
@@ -86,8 +86,9 @@ def start_client():
     if username is None:
         return
     root.deiconify()
-    client = Client(username)
-    chat_window = ChatWindow(root, username, client)
+    chat_window = ChatWindow(root, username)
+    client = Client(chat_window)
+    chat_window.client = client
     root.mainloop()
 
 
