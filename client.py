@@ -36,7 +36,7 @@ class Client:
         self.channel.basic_publish(exchange=self.active_chat, routing_key='', body=message)
 
     def switch_to_chat(self, chat_name):
-        self.channel.exchange_declare(chat_name)
+        self.channel.exchange_declare(exchange=chat_name, exchange_type='fanout')
 
         if chat_name not in self.chats:
             self.chats[chat_name] = Chat(chat_name)
