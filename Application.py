@@ -44,6 +44,7 @@ class ChatWindow(MessageSubscriber):
         channel_name = self.input_channel_name_field.get()
         self.input_channel_name.set('')
         print(f'Subscribe on: {channel_name}')
+        self.client.switch_to_chat(channel_name)
 
     def configure_tab(self, channel_name):
         tab = ttk.Frame(self.tab_parent)
@@ -84,7 +85,9 @@ class ChatWindow(MessageSubscriber):
         message = f'{self.username}: {input_value}'
         self.channel_name_to_input_user[channel_name].set('')
         print(f'Send into: {channel_name}. Message: {message}')
-        self.put_message_in_channel(channel_name, message)
+        # self.put_message_in_channel(channel_name, message)
+        self.client.switch_to_chat(channel_name)
+        self.client.send_message(message)
 
     def receive_message(self, text, channel):
         self.put_message_in_channel(channel, text)
@@ -99,8 +102,8 @@ def start_client():
         return
     root.deiconify()
     chat_window = ChatWindow(root, username)
-    # client = Client(chat_window)
-    # chat_window.client = client
+    client = Client(chat_window)
+    chat_window.client = client
     root.mainloop()
 
 
