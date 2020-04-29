@@ -9,7 +9,16 @@ class Chat:
 
 
 class Client:
-    def __init__(self, name, channel):
+    def __init__(self, name):
+        connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host='localhost'))
+        channel = connection.channel()
+
+        self.name = get_name()
+
+        consuming = Thread(client.channel.start_consuming)
+        consuming.start()
+
         self.active_chat = None
         self.name = name
         self.chats = {}
@@ -26,6 +35,9 @@ class Client:
 
         self.active_chat = self.chats[chat_name]
 
+        result = channel.queue_declare(queue='', exclusive=True)
+        queue_name = result.method.queue
+        channel.queue_bind(exchange=chat_name, queue=queue_name)
 
     def read_message(self, message):
         pass
