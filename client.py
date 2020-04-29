@@ -45,11 +45,7 @@ class Client:
 
     def reading(self):
         while True:
-            connection = pika.BlockingConnection()
-
-            channel = connection.channel()
-            channel.basic_consume(
+            self.channel.basic_consume(
                 queue=self.queue_name, on_message_callback=self.read_message, auto_ack=True
             )
-            channel.start_consuming()
-            connection.close()
+            self.channel.start_consuming()
