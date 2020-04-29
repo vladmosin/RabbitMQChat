@@ -9,23 +9,23 @@ class Chat:
 
 
 class Client:
-    def __init__(self, name):
+    def __init__(self):
         connection = pika.BlockingConnection(
             pika.ConnectionParameters(host='localhost'))
         channel = connection.channel()
 
-        self.name = get_name()
-
-        consuming = Thread(client.channel.start_consuming)
-        consuming.start()
-
         self.active_chat = None
-        self.name = name
         self.chats = {}
         self.channel = channel
 
+        consuming = Thread(channel.start_consuming)
+        consuming.start()
+
     def send_message(self, message):
-        pass
+        if self.active_chat is None:
+            exit(0)
+
+        self.channel.basic_publish(exchange=self.active_chat, routing_key='', body=message)
 
     def switch_to_chat(self, chat_name):
         self.channel.exchange_declare(chat_name)
@@ -35,26 +35,9 @@ class Client:
 
         self.active_chat = self.chats[chat_name]
 
-        result = channel.queue_declare(queue='', exclusive=True)
+        result = self.channel.queue_declare(queue='', exclusive=True)
         queue_name = result.method.queue
-        channel.queue_bind(exchange=chat_name, queue=queue_name)
+        self.channel.queue_bind(exchange=chat_name, queue=queue_name)
 
-    def read_message(self, message):
-        pass
-
-
-def get_name():
-    return "Vasya"
-
-
-if __name__ == "__main__":
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host='localhost'))
-    channel = connection.channel()
-
-    name = get_name()
-    client = Client(name=name, channel=channel)
-
-    consuming = Thread(client.channel.start_consuming)
-    consuming.start()
-    consuming.join()
+    def callback(self, ch, method, properties, body):
+        print(" [x] %r:%r" % (method.routing_key, body))
