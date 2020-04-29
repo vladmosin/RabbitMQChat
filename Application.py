@@ -4,8 +4,11 @@ from tkinter import N, S, W, E, Grid
 from tkinter import Tk, StringVar, Entry, Frame, END, BOTH, Scrollbar, Listbox, Button, simpledialog, YES, ttk
 from threading import Lock
 
+from MessageSubscriber import MessageSubscriber
+from client import Client
 
-class ChatWindow:
+
+class ChatWindow(MessageSubscriber):
     def __init__(self, root, username):
         self.frame = Frame(root)
         self.username = username
@@ -76,6 +79,7 @@ def client():
     if username is None:
         return
     root.deiconify()
+    # client = Client(username)
     chat_window = ChatWindow(root, username)
     root.mainloop()
 
