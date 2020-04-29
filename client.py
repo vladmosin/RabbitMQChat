@@ -41,4 +41,4 @@ class Client:
         self.channel.queue_bind(exchange=chat_name, queue=queue_name)
 
     def read_message(self, ch, method, properties, body):
-
+        pass

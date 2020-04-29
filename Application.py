@@ -24,6 +24,7 @@ class ChatWindow(MessageSubscriber):
         Grid.columnconfigure(self.frame, 1, weight=0)
         Grid.rowconfigure(self.frame, 0, weight=2)
         Grid.rowconfigure(self.frame, 1, weight=0)
+        Grid.rowconfigure(self.frame, 2, weight=0)
 
         self.tab_parent = ttk.Notebook(self.frame)
         self.tab_parent.grid(row=0, column=0)
@@ -33,7 +34,16 @@ class ChatWindow(MessageSubscriber):
 
         self.frame.pack(fill=BOTH, expand=YES)
 
-        self.put_message_in_channel('1 channel', 'Hello world!', 'Vasya')
+        self.input_channel_name = StringVar()
+        self.input_channel_name_field = Entry(self.tab_parent, text=self.input_channel_name)
+        self.input_channel_name_field.grid(row=2, column=0, sticky=W+E+S)
+        self.subscribe_button = Button(self.tab_parent, text="Subscribe", command=self.subscribe)
+        self.subscribe_button.grid(row=2, column=1, sticky=S)
+
+    def subscribe(self):
+        channel_name = self.input_channel_name_field.get()
+        self.input_channel_name.set('')
+        print(f'Subscribe on: {channel_name}')
 
     def configure_tab(self, channel_name):
         tab = ttk.Frame(self.tab_parent)
@@ -62,20 +72,22 @@ class ChatWindow(MessageSubscriber):
 
         input_field.focus()
 
-    def put_message_in_channel(self, channel_name, message, username, color="red"):
+    def put_message_in_channel(self, channel_name, message, color="red"):
         with self.put_message_lock:
             messages = self.channel_name_to_messages[channel_name]
-            messages.insert(END, username + ": " + message)
+            messages.insert(END, message)
             messages.itemconfig(END, {"fg": color})
             messages.yview(END)
 
     def send_message(self, channel_name):
         input_value = self.channel_name_to_input_field[channel_name].get()
+        message = f'{self.username}: {input_value}'
         self.channel_name_to_input_user[channel_name].set('')
-        print(f'Send into: {channel_name}. Message: {input_value}')
+        print(f'Send into: {channel_name}. Message: {message}')
+        self.put_message_in_channel(channel_name, message)
 
     def receive_message(self, text, channel):
-        pass
+        self.put_message_in_channel(channel, text)
 
 
 def start_client():
@@ -87,8 +99,8 @@ def start_client():
         return
     root.deiconify()
     chat_window = ChatWindow(root, username)
-    client = Client(chat_window)
-    chat_window.client = client
+    # client = Client(chat_window)
+    # chat_window.client = client
     root.mainloop()
 
 
