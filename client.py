@@ -41,7 +41,7 @@ class Client:
         if chat_name not in self.chats:
             self.chats[chat_name] = Chat(chat_name)
 
-        self.active_chat = self.chats[chat_name]
+        self.active_chat = self.chats[chat_name].name
         self.channel.queue_bind(exchange=chat_name, queue=self.queue_name)
 
     def read_message(self, ch, method, properties, body):
