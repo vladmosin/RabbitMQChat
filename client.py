@@ -46,4 +46,4 @@ class Client:
 
 
 def read_message(self, ch, method, properties, body):
-    self.message_subscriber(body, method.exchange)
+    self.message_subscriber.receive_message(body, method.exchange)
