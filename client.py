@@ -1,5 +1,6 @@
 import pika
-from threading import Thread
+from threading import Thread, Lock
+import random
 
 
 class Chat:
@@ -10,47 +11,50 @@ class Chat:
 
 class Client:
     def __init__(self, message_subscriber):
-        connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host='localhost'))
-        channel = connection.channel()
-
         self.active_chat = None
         self.chats = {}
-        self.channel = channel
         self.message_subscriber = message_subscriber
+        self.lock = Lock()
 
-        result = channel.queue_declare(queue='', exclusive=True)
-        self.queue_name = result.method.queue
+        self.queue_name = None
+        self.queue_init()
 
         consuming = Thread(target=self.reading, daemon=True)
         consuming.start()
 
+    def queue_init(self):
+        with pika.BlockingConnection(pika.ConnectionParameters(host='localhost')) as connection:
+            channel = connection.channel()
+            self.queue_name = str(random.getrandbits(128))
+            channel.queue_declare(queue=self.queue_name)
+
+    def send_message_to_chat(self, message, chat_name):
+        self.switch_to_chat(chat_name)
+        self.send_message(message)
+
     def send_message(self, message):
         if self.active_chat is None:
-            exit(0)
-
-        self.channel.basic_publish(exchange=self.active_chat, routing_key='', body=message)
+            return
+        with pika.BlockingConnection(pika.ConnectionParameters(host='localhost')) as connection:
+            channel = connection.channel()
+            channel.basic_publish(exchange=self.active_chat, routing_key=self.queue_name, body=message)
 
     def switch_to_chat(self, chat_name):
-        self.channel.exchange_declare(exchange=chat_name, exchange_type='fanout')
+        with pika.BlockingConnection(pika.ConnectionParameters(host='localhost')) as connection:
+            channel = connection.channel()
 
-        if chat_name not in self.chats:
-            self.chats[chat_name] = Chat(chat_name)
+            if chat_name not in self.chats:
+                self.chats[chat_name] = Chat(chat_name)
 
-        self.active_chat = self.chats[chat_name].name
-        self.channel.queue_bind(exchange=chat_name, queue=self.queue_name)
+            channel.exchange_declare(exchange=chat_name, exchange_type='fanout')
+            self.active_chat = self.chats[chat_name].name
+            channel.queue_bind(exchange=chat_name, queue=self.queue_name)
 
     def read_message(self, ch, method, properties, body):
         self.message_subscriber.receive_message(body, method.exchange)
 
     def reading(self):
-        channel = pika.BlockingConnection(
-            pika.ConnectionParameters(host='localhost')
-        ).channel()
-        result = channel.queue_declare(queue='', exclusive=True)
-        queue_name = result.method.queue
-        while True:
-            channel.basic_consume(
-                queue=queue_name, on_message_callback=self.read_message, auto_ack=True
-            )
-            channel.start_consuming()
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        channel = connection.channel()
+        channel.basic_consume(queue=self.queue_name, on_message_callback=self.read_message, auto_ack=True)
+        channel.start_consuming()
